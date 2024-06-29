@@ -63,7 +63,7 @@ for line in data.split("\n"):
             one_game_result[key] = int(Decimal(str(pre_val)).quantize(Decimal('0'), ROUND_HALF_UP))
 
         #合計が０になるよう、トップエテの値を補正
-        top_ete = next(iter(one_game_result))
+        top_ete = max(one_game_result, key=one_game_result.get)
         one_game_result[top_ete] -= sum(one_game_result.values())
 
     # NAGAが不存在の場合のみ、エクセルに追記
