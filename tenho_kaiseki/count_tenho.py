@@ -1,5 +1,6 @@
 import openpyxl as px
 from datetime import datetime
+from decimal import Decimal, ROUND_HALF_UP
 import sys
 
 wb = px.load_workbook("template.xlsm")
@@ -10,7 +11,7 @@ wb = px.load_workbook("template.xlsm")
 ete_names = {
     '妖怪': '妖怪みむら',
     'マゾイ': 'マゾイ',
-    '仏': '仏',
+    '仏': 'こぼとけ',
     'hsmt': 'hsmt_ete',
     'UMD': 'tehutehu',
 }
@@ -54,6 +55,16 @@ for line in data.split("\n"):
         result_str = ete_results[i]
         ete_name, ete_result = get_result(result_str)
         one_game_result[ete_name] = ete_result
+
+        #五捨六入処理
+        for key, value in one_game_result.items():
+            #プラスの場合-0.1を、マイナスの場合そのまま四捨五入（roundは正確じゃないため、Decimal.quantizeを使用）
+            pre_val = value - 0.1 if value >= 0 else value
+            one_game_result[key] = int(Decimal(str(pre_val)).quantize(Decimal('0'), ROUND_HALF_UP))
+
+        #合計が０になるよう、トップエテの値を補正
+        top_ete = next(iter(one_game_result))
+        one_game_result[top_ete] -= sum(one_game_result.values())
 
     # NAGAが不存在の場合のみ、エクセルに追記
     for ete_name in one_game_result.keys():
